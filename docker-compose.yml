@@ -1,0 +1,35 @@
+version : "3"
+
+services:
+  postgresql:
+    image: postgres
+    container_name: Postgresql
+    ports:
+      - "5432:5432"   
+  mongodb:
+    image: mongo
+    container_name: mongoDB
+    ports:
+        - "27017:27017"
+        
+  microservice-patient:
+    container_name: miscroservice-patient
+    build : ./microservice-patient
+    ports:
+    - "9001:9001"
+  microservice-note:
+    container_name: miscroservice-note
+    build : ./microservice-note
+    ports:
+    - "9002:9002"
+  microservice-diabete:
+    container_name: miscroservice-diabete
+    build : ./microservice-diabete
+    ports:
+    - "9003:9003"
+  microservice-clientui:
+    container_name: miscroservice-clientui
+    build : ./microservice-clientui
+    ports:
+    - "9000:9000"
+  
