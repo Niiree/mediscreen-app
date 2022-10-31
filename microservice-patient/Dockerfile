@@ -1,3 +1,2 @@
-FROM openjdk:17
-CMD 
-ENTRYPOINT ["java", "-jar", "mediscreen-patient-1.0.0.jar"]
+FROM openjdk:17-slim
+EXPOSE 9000
