@@ -1,4 +1,4 @@
-package com.microservice.note;
+package com.microservice.note.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
