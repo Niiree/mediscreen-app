@@ -1,69 +1,84 @@
 package com.microservice.note.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.microservice.note.exception.NoteNotFoundException;
 import com.microservice.note.model.Note;
 import com.microservice.note.repository.NoteRepository;
 
 @Service
-public class NoteService{
-	
+public class NoteService {
+
 	private static final Logger logger = LogManager.getLogger(NoteService.class);
-	
+
+	private final NoteRepository noteRepository;
+
 	@Autowired
-	private NoteRepository noteRepository;
-
-	public List<Note> getAllNotes(Integer idPatient){
-		List<Note> listNotes = noteRepository.findByIdPatient(idPatient);
-		return listNotes;
+	public NoteService(NoteRepository noteRepository) {
+		this.noteRepository = noteRepository;
 	}
 
-	public Note create(Integer idPatient, Note note){
-		Note newNote = new Note (note.getComment());
-		newNote.setIdPatient(idPatient);
-		noteRepository.save(newNote);
-		logger.info("New note create");
-		return newNote;
+	/**
+	 * Récupère toutes les notes d'un patient.
+	 */
+	public List<Note> getAllNotes(Integer patientId) {
+		logger.info("Fetching all notes for patientId={}", patientId);
+		return noteRepository.findByIdPatient(patientId);
 	}
-	
-		public Note get(String id){
-		Optional<Note> note = noteRepository.findById(id);
-		if(note.isPresent()) {
-			return note.get();
+
+	/**
+	 * Crée une nouvelle note pour un patient.
+	 */
+	public Note create(Integer patientId, Note note) {
+		Note toSave = new Note(note.getComment());
+		toSave.setIdPatient(patientId);
+		Note saved = noteRepository.save(toSave);
+		logger.info("Created new note with id={} for patientId={}", saved.getId(), patientId);
+		return saved;
+	}
+
+	/**
+	 * Récupère une note par son ID, ou lève si introuvable.
+	 */
+	public Note get(String id) {
+		Note note = noteRepository.findById(id)
+				.orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " was not found"));
+		logger.info("Fetched note with id={}", id);
+		return note;
+	}
+
+	/**
+	 * Met à jour une note existante.
+	 */
+	@Transactional
+	public Note update(String id, Note incoming) {
+		Note existing = noteRepository.findById(id)
+				.orElseThrow(() -> new NoteNotFoundException("Note with ID " + id + " was not found"));
+
+		existing.setComment(incoming.getComment());
+		// Si d'autres champs existent, les mettre à jour ici
+
+		Note updated = noteRepository.save(existing); // explicite même si transactionnel
+		logger.info("Updated note with id={}", id);
+		return updated;
+	}
+
+	/**
+	 * Supprime une note par son ID. Lève une exception si introuvable.
+	 */
+	public void delete(String id) {
+		if (!noteRepository.existsById(id)) {
+			logger.warn("Attempt to delete nonexistent note with id={}", id);
+			throw new NoteNotFoundException("Note with ID " + id + " was not found");
 		}
-		throw new NoteNotFoundException("Note not found");
+		noteRepository.deleteById(id);
+		logger.info("Deleted note with id={}", id);
 	}
-
-	public Note update(String id, Note note){
-		Optional<Note> noteUpdate = noteRepository.findById(id);
-		
-		if(noteUpdate.isPresent()) {
-			noteUpdate.get().setComment(note.getComment());
-			noteRepository.save(note);
-			logger.info("UPDATE :  note id : "+id);
-			return note;
-		}
-		throw new NoteNotFoundException("Note not found");
-	}
-	
-	public boolean delete(String id){
-		if(noteRepository.findById(id).isPresent()) {
-			logger.info("get note id : "+id);
-			noteRepository.deleteById(id);
-			return true;
-		}else {
-			logger.warn("Deletion abort because note was not found...");
-			return false;
-		}
-		
-		
-	}
-
 }

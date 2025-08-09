@@ -2,9 +2,8 @@ package com.mediscreen.patient.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -136,28 +135,31 @@ public class PatientControllerTest{
                 .andReturn();
         assertTrue(result.getResponse().getContentAsString().contains(response));
     }
-    
+
     @Test
-    public void getDelete() throws Exception {
-        String response = "Deletion successful !";
-        when(patientService.delete(4)).thenReturn(true);
-        MvcResult result = mockMvc.perform(get("/patient/delete/4"))
+    public void testDeletePatient() throws Exception {
+        // Simuler le comportement du service : pas d'exception = suppression OK
+        doNothing().when(patientService).delete(4);
+
+        MvcResult result = mockMvc.perform(delete("/patient/delete/4"))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains(response));
+
+        assertTrue(result.getResponse().getContentAsString().contains("Deletion successful !"));
     }
-    
+
     @Test
-    public void getDeleteError() throws Exception {
-        String response = "Patient was not found.";
-        MvcResult result = mockMvc.perform(get("/patient/delete/-1"))
+    public void testDeletePatientNotFound() throws Exception {
+        // Simuler le comportement du service : lancer l'exception
+        doThrow(new PatientNotFoundException("Patient with ID 4 was not found"))
+                .when(patientService).delete(4);
+
+        mockMvc.perform(delete("/patient/delete/4"))
                 .andDo(print())
-                .andExpect(status().isNotFound())
-                .andReturn();
-        assertTrue(result.getResponse().getContentAsString().contains(response));
+                .andExpect(status().isNotFound());
     }
-    
+
     
     
 }
