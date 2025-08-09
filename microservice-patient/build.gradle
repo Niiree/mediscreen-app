@@ -28,10 +28,10 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-
 bootJar {
-    baseName = 'mediscreen-patient'
-    version =  '1.0.0'
+	archiveBaseName.set('mediscreen-patient')
+	archiveVersion.set('1.0.0')
 }
+
 sourceCompatibility = 17
 targetCompatibility = 17

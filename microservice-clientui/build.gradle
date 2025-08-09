@@ -37,3 +37,9 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+bootJar {
+	archiveBaseName.set('mediscreen-clientui')
+	archiveVersion.set('1.0.0')
+}
