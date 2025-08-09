@@ -1,10 +1,16 @@
-FROM openjdk:17-jdk-slim
-VOLUME /tmp
-ARG JAVA_OPTS
-ENV JAVA_OPTS=$JAVA_OPTS
-CMD [ "spring-boot:run" ]
-COPY microservice-patient mediscreen.jar
-EXPOSE 9000
-ENTRYPOINT exec java $JAVA_OPTS -jar comdockerdevenvironments.jar
-# For Spring-Boot project, use the entrypoint below to reduce Tomcat startup time.
-#ENTRYPOINT exec java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar comdockerdevenvironments.jar
+FROM gradle:8.5-jdk17 AS build
+WORKDIR /app
+
+COPY gradlew .
+COPY build.gradle settings.gradle ./
+COPY gradle ./gradle
+COPY src ./src
+
+RUN chmod +x gradlew
+RUN ./gradlew build -x test
+
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/build/libs/*.jar app.jar
+EXPOSE 9001
+ENTRYPOINT ["java", "-jar", "app.jar"]
