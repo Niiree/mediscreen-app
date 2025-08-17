@@ -53,17 +53,16 @@
 						<td th:text="${patient.getPhoneNumber()}">Phone Number</td>
 						<td>
 						
-							<a
-							th:href="@{/patient/update/{id}(id=${patient.getId()})}"
+							<a th:href="@{/patient/update/{id}(id=${patient.getId()})}"
 							class="btn btn-success">Edit</a>
-							<a
-							th:href="@{/patient/delete/{id}(id=${patient.getId()})}"
-							class="btn btn-success">Delete</a>
-							<a
-							th:href="@{/patient/{id}/notes(id=${patient.getId()})}"
+
+							<form th:action="@{/patient/delete/{id}(id=${patient.id})}" method="post" class="d-inline">
+								<button type="submit" class="btn btn-danger btn-sm">Delete</button>
+							</form>
+
+							<a th:href="@{/notes/patient/{id}/notes(id=${patient.getId()})}"
 							class="btn btn-success">Note</a>
-							<a
-							th:href="@{/patient/{id}/diabetes/getInfo(id=${patient.getId()})}"
+							<a th:href="@{/patient/{id}/diabetes/getInfo(id=${patient.getId()})}"
 							class="btn btn-success">Analyze</a>
 							</td>
 					</tr>

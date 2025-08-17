@@ -39,12 +39,15 @@
 					<p class="text-danger" th:if="${#fields.hasErrors('birthdate')}"
 						th:errors="*{birthdate}"></p>
 				</div>
-				
+
 				<div>
-					<input class="form-control mb-4" th:field="*{gender}"
-						placeholder="gender" autofocus="autofocus">
+					<select class="form-control mb-4" th:field="*{gender}">
+						<option value="" disabled selected>-- Select Gender --</option>
+						<option value="M">M</option>
+						<option value="F">F</option>
+					</select>
 					<p class="text-danger" th:if="${#fields.hasErrors('gender')}"
-						th:errors="*{gender}"></p>
+					   th:errors="*{gender}"></p>
 				</div>
 				
 				<div>
