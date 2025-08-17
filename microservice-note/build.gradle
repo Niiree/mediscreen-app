@@ -7,7 +7,7 @@ plugins {
 
 group = 'com.microservice'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+targetCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
@@ -25,13 +25,10 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
-tasks.named('test') {
-	useJUnitPlatform()
-}
 
 bootJar {
 	archiveBaseName.set('mediscreen-note')
 	archiveVersion.set('1.0.0')
+	mainClass.set('com.microservice.note.NoteApplication')
 }
-sourceCompatibility = 17
-targetCompatibility = 17
+

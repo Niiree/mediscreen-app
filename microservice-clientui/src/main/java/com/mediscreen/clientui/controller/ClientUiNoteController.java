@@ -14,7 +14,7 @@ import com.mediscreen.clientui.beans.NoteBean;
 import com.mediscreen.clientui.proxies.NotesProxies;
 
 @Controller
-@RequestMapping("/patient/{patientId}/notes")
+@RequestMapping
 public class ClientUiNoteController {
 
 	private final NotesProxies notesProxies;
@@ -23,62 +23,80 @@ public class ClientUiNoteController {
 		this.notesProxies = notesProxies;
 	}
 
-	@GetMapping
-	public String listNotes(@PathVariable("patientId") Integer patientId, Model model) {
+	// LIST
+	// UI:   GET /patient/{patientId}/
+	// Proxy:GET /notes/patient/{patientId}
+	@GetMapping("/notes/patient/{patientId}/")
+	public String listNotes(@PathVariable Integer patientId, Model model) {
 		List<NoteBean> notes = notesProxies.getAllNotes(patientId);
 		model.addAttribute("notes", notes);
 		model.addAttribute("patientId", patientId);
-		return "note/notesList";
+		return "notes/notesList";
 	}
 
-	@GetMapping("/add")
-	public String showAddNoteForm(@PathVariable("patientId") Integer patientId, Model model) {
+	// SHOW ADD FORM
+	// UI:   GET /patient/{patientId}/notes/add
+	@GetMapping("/notes/patient/{patientId}/add")
+	public String showAddNoteForm(@PathVariable Integer patientId, Model model) {
 		model.addAttribute("noteBean", new NoteBean());
 		model.addAttribute("patientId", patientId);
-		return "note/formAddNote";
+		return "notes/formAddNote";
 	}
 
-	@PostMapping("/add")
-	public String addNote(@PathVariable("patientId") Integer patientId,
+	// ADD
+	// UI:   POST /patient/{patientId}/notes/add
+	// Proxy:POST /notes/patient/{patientId}
+	@PostMapping("/notes/patient/{patientId}/add")
+	public String addNote(@PathVariable Integer patientId,
 						  @Valid @ModelAttribute("noteBean") NoteBean noteBean,
 						  BindingResult result) {
 		if (result.hasErrors()) {
-			return "note/formAddNote";
+			return "notes/formAddNote";
 		}
 		noteBean.setIdPatient(patientId);
 		notesProxies.addNote(patientId, noteBean);
-		return "redirect:/patient/{patientId}/notes";
+		return "redirect:/notes/patient/" + patientId ;
 	}
 
-	@GetMapping("/update/{noteId}")
-	public String showUpdateNoteForm(@PathVariable("noteId") String noteId,
-									 @PathVariable("patientId") Integer patientId,
+	// SHOW UPDATE FORM
+	// UI:   GET /patient/{patientId}/notes/{noteId}/edit
+	// Proxy:GET /notes/{noteId}
+	@GetMapping("/notes/patient/{patientId}/{noteId}/edit")
+	public String showUpdateNoteForm(@PathVariable Integer patientId,
+									 @PathVariable String noteId,
 									 Model model) {
 		Optional<NoteBean> noteOpt = notesProxies.getNote(noteId);
 		if (noteOpt.isEmpty()) {
-			return "redirect:/patient/{patientId}/notes"; // ou page d'erreur
+			return "redirect:/notes/patient/" + patientId ;
 		}
 		model.addAttribute("noteBean", noteOpt.get());
 		model.addAttribute("patientId", patientId);
-		return "note/formUpdateNote";
+		model.addAttribute("noteId", noteId);
+		return "notes/formUpdateNote";
 	}
 
-	@PostMapping("/update/{noteId}")
-	public String updateNote(@PathVariable("noteId") String noteId,
-							 @PathVariable("patientId") Integer patientId,
+	// UPDATE
+	// UI:   POST /patient/{patientId}/notes/{noteId}/edit
+	// Proxy:PUT  /notes/{noteId}   (ou POST /notes/update/{noteId} si backend legacy)
+	@PostMapping("/notes/patient/{patientId}/{noteId}/edit")
+	public String updateNote(@PathVariable Integer patientId,
+							 @PathVariable String noteId,
 							 @Valid @ModelAttribute("noteBean") NoteBean noteBean,
 							 BindingResult result) {
 		if (result.hasErrors()) {
-			return "note/formUpdateNote";
+			return "notes/formUpdateNote";
 		}
 		notesProxies.updateNote(noteId, noteBean);
-		return "redirect:/patient/{patientId}/notes";
+		return "redirect:/notes/patient/" + patientId ;
 	}
 
-	@GetMapping("/delete/{noteId}")
-	public String deleteNote(@PathVariable("noteId") String noteId,
-							 @PathVariable("patientId") Integer patientId) {
+	// DELETE
+	// UI:   GET /patient/{patientId}/notes/{noteId}/delete
+	// Proxy:DELETE /notes/{noteId} (ou GET /notes/delete/{noteId} si legacy)
+	@GetMapping("/notes/patient/{patientId}/{noteId}/delete")
+	public String deleteNote(@PathVariable Integer patientId,
+							 @PathVariable String noteId) {
 		notesProxies.deleteNote(noteId);
-		return "redirect:/patient/{patientId}/notes";
+		return "redirect:/notes/patient/" + patientId;
 	}
 }

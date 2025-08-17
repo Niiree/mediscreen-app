@@ -5,9 +5,9 @@ plugins {
 	id 'jacoco'
 }
 
-group = 'com.mediscreen'
+group = 'com.microservice'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+targetCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
@@ -18,11 +18,9 @@ dependencies {
   	implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
  	runtimeOnly 'org.postgresql:postgresql'
-  
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	
 }
 
 tasks.named('test') {
@@ -32,6 +30,3 @@ bootJar {
 	archiveBaseName.set('mediscreen-patient')
 	archiveVersion.set('1.0.0')
 }
-
-sourceCompatibility = 17
-targetCompatibility = 17

@@ -4,14 +4,12 @@ import java.util.Date;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.persistence.Id;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 public class PatientBean {
 
-	@Id
 	private Integer id;
 	@NotEmpty(message = "FirstName is mandatory")
 	private String firstName;

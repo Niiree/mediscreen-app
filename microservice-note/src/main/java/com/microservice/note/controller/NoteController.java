@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.microservice.note.exception.NoteNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,7 @@ public class NoteController {
 	 * Récupère toutes les notes d'un patient.
 	 * GET /patient/{patientId}/notes
 	 */
-	@GetMapping("/patient/{patientId}/notes")
+	@GetMapping("notes/patient/{patientId}")
 	public ResponseEntity<List<Note>> getAllNotesForPatient(@PathVariable Integer patientId) {
 		logger.info("GET /patient/{}/notes - Fetching all notes for patient", patientId);
 		return ResponseEntity.ok(noteService.getAllNotes(patientId));
@@ -45,7 +46,7 @@ public class NoteController {
 	 * Crée une note pour un patient.
 	 * POST /patient/{patientId}/notes
 	 */
-	@PostMapping("/patient/{patientId}/notes")
+	@PostMapping("/notes/patient/{patientId}")
 	public ResponseEntity<Note> addNote(@PathVariable Integer patientId, @Valid @RequestBody Note note) {
 		logger.info("POST /patient/{}/notes - Creating note", patientId);
 		Note created = noteService.create(patientId, note);
@@ -81,7 +82,11 @@ public class NoteController {
 	@DeleteMapping("/notes/{noteId}")
 	public ResponseEntity<Void> deleteNote(@PathVariable String noteId) {
 		logger.info("DELETE /notes/{} - Deleting note", noteId);
-		noteService.delete(noteId);
+		boolean deleted = noteService.delete(noteId);
+		if (!deleted) {
+			logger.warn("Note not found: {}", noteId);
+			return ResponseEntity.notFound().build();
+		}
 		return ResponseEntity.noContent().build();
 	}
 }

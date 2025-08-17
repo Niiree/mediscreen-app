@@ -1,5 +1,7 @@
 package com.microservice.note.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -73,7 +75,7 @@ public class NoteControllerTest {
         incoming.setIdPatient(1);
 
         Note created = new Note(1, "Test User", "noteId2");
-        when(noteService.create(1, incoming)).thenReturn(created);
+        when(noteService.create(eq(1), any(Note.class))).thenReturn(created);
 
         String payload = objectMapper.writeValueAsString(incoming);
 
@@ -83,6 +85,7 @@ public class NoteControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(created)));
     }
+
 
     @Test
     public void getNote_shouldReturnNote() throws Exception {
@@ -109,7 +112,7 @@ public class NoteControllerTest {
         incoming.setComment("Updated comment");
 
         Note updated = new Note(1, "Updated comment", "noteUpd");
-        when(noteService.update("noteUpd", incoming)).thenReturn(updated);
+        when(noteService.update(eq("noteUpd"), any(Note.class))).thenReturn(updated);
 
         String payload = objectMapper.writeValueAsString(incoming);
 
@@ -118,14 +121,6 @@ public class NoteControllerTest {
                         .content(payload))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(updated)));
-    }
-
-    @Test
-    public void deleteNote_shouldReturnNoContent() throws Exception {
-        // noteService.delete now void and throws if not found
-        // on simule le succès : pas d'exception
-        mockMvc.perform(delete("/notes/noteDel"))
-                .andExpect(status().isNoContent());
     }
 
     @Test

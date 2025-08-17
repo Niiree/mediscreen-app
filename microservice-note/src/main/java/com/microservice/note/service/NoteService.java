@@ -73,12 +73,11 @@ public class NoteService {
 	/**
 	 * Supprime une note par son ID. Lève une exception si introuvable.
 	 */
-	public void delete(String id) {
-		if (!noteRepository.existsById(id)) {
-			logger.warn("Attempt to delete nonexistent note with id={}", id);
-			throw new NoteNotFoundException("Note with ID " + id + " was not found");
+	public boolean delete(String noteId) {
+		if (!noteRepository.existsById(noteId)) {
+			return false;
 		}
-		noteRepository.deleteById(id);
-		logger.info("Deleted note with id={}", id);
+		noteRepository.deleteById(noteId);
+		return true;
 	}
 }

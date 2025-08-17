@@ -66,7 +66,7 @@ public class ClientUiController {
 		return "redirect:/";
 	}
 
-	@GetMapping("/patient/delete/{id}")
+	@PostMapping("/patient/delete/{id}")
 	public String deletePatient(@PathVariable("id") Integer id) {
 		patientsProxy.deletePatient(id);
 		return "redirect:/";

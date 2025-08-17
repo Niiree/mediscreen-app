@@ -31,9 +31,9 @@ public class PatientController {
 		this.patientService = patientService;
 	}
 
-	@GetMapping
+	@GetMapping("/getAll")
 	public ResponseEntity<List<Patient>> getAllPatients() {
-		logger.info("GET /patient - Fetching all patients");
+		logger.info("GET /patient/getAll - Fetching all patients");
 		return ResponseEntity.ok(patientService.getAll());
 	}
 

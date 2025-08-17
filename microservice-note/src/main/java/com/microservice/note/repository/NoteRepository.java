@@ -10,5 +10,4 @@ import com.microservice.note.model.Note;
 @Repository
 public interface NoteRepository extends MongoRepository<Note, String> {
 	public List<Note> findByIdPatient(Integer id);
-
 }

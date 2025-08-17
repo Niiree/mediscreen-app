@@ -1,0 +1,18 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: client-ui
+
+
+gateway:
+  base-url: http://microservice-gateway:8080
+patients:
+  base-url: http://microservice-gateway:8080
+
+notes:
+  base-url: http://microservice-gateway:8080/notes
+
+diabetes:
+  base-url: http://microservice-gateway:8080/diabetes

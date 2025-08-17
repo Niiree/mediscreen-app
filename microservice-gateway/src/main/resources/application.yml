@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  security:
+    user:
+      name: user
+      password: password
+
+  cloud:
+    gateway:
+      routes:
+        - id: patient-service
+          uri: http://microservice-patient:9001
+          predicates:
+            - Path=/**
+
+        - id: note-service
+          uri: http://microservice-note:9002
+          predicates:
+            - Path=/notes/**
+
+        - id: diabete-service
+          uri: http://microservice-diabete:9003
+          predicates:
+            - Path=/diabetes/**
+
+        - id: clientui
+          uri: http://microservice-clientui:9000
+          predicates:
+            - Path=/**

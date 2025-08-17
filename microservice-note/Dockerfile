@@ -10,13 +10,16 @@ COPY src ./src
 RUN chmod +x gradlew
 
 # Construire le projet sans lancer les tests
-RUN ./gradlew build -x test
+RUN ./gradlew clean bootJar -x test
 
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
 # Copier le jar construit depuis l'étape de build
 COPY --from=build /app/build/libs/*.jar app.jar
+
+# Vérifier que le jar est bien présent (optionnel)
+RUN ls -l /app
 
 # Exposer le port 9002 (selon ton besoin)
 EXPOSE 9002
