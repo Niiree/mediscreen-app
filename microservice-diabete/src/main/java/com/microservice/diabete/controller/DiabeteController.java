@@ -13,7 +13,7 @@ import com.microservice.diabete.model.Diabete;
 import com.microservice.diabete.service.DiabetesService;
 
 @RestController
-@RequestMapping("/patient/{patientId}/diabetes")
+@RequestMapping("/diabetes")
 public class DiabeteController {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiabeteController.class);
@@ -25,7 +25,7 @@ public class DiabeteController {
 		this.service = service;
 	}
 
-	@PostMapping("/risk")
+	@PostMapping("/patient/{patientId}/risk")
 	public ResponseEntity<DiabetesRiskResponse> assessRisk(
 			@PathVariable("patientId") Integer patientId,
 			@Valid @RequestBody Diabete diabete) {

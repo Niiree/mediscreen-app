@@ -1,31 +1,36 @@
-server:
-  port: 8080
-
 spring:
-  security:
-    user:
-      name: user
-      password: password
-
   cloud:
     gateway:
       routes:
-        - id: patient-service
-          uri: http://microservice-patient:9001
+        # Redirige la racine / vers /ui/
+        - id: root-to-ui
+          uri: no://op
           predicates:
-            - Path=/**
+            - Path=/
+          filters:
+            - RedirectTo=302, /ui/
 
-        - id: note-service
-          uri: http://microservice-note:9002
-          predicates:
-            - Path=/notes/**
-
-        - id: diabete-service
-          uri: http://microservice-diabete:9003
-          predicates:
-            - Path=/diabetes/**
-
-        - id: clientui
+        # UI
+        - id: client-ui
           uri: http://microservice-clientui:9000
           predicates:
-            - Path=/**
+            - Path=/ui/**
+          filters:
+            - StripPrefix=1
+            - PreserveHostHeader
+            - AddRequestHeader=X-Forwarded-Prefix, /ui
+        # API
+        - id: patients
+          uri: http://microservice-patient:9001
+          predicates: [ Path=/patient/** ]
+          filters: [ StripPrefix=0 ]
+
+        - id: notes
+          uri: http://microservice-note:9002
+          predicates: [ Path=/notes/** ]
+          filters: [ StripPrefix=0 ]
+
+        - id: diabetes
+          uri: http://microservice-diabete:9003
+          predicates: [ Path=/diabetes/** ]
+          filters: [ StripPrefix=0 ]

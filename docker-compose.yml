@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: mediscreenPatient
     ports:
-      - "5432:5432"
+      - "5432:5432"           # facultatif: utile si tu veux te connecter depuis l'hôte
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -18,52 +18,61 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     ports:
-      - "27017:27017"
+      - "27017:27017"         # facultatif idem
     volumes:
       - mongodata:/data/db
 
   microservice-patient:
     container_name: microservice-patient
     build: ./microservice-patient
-    ports:
-      - "9001:9001"
+    expose:
+      - "9001"                # plus de "ports:", seulement "expose" (réseau interne)
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - postgresql
 
   microservice-note:
     container_name: microservice-note
     build: ./microservice-note
-    ports:
-      - "9002:9002"
+    expose:
+      - "9002"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - mongodb
 
   microservice-diabete:
     container_name: microservice-diabete
     build: ./microservice-diabete
-    ports:
-      - "9003:9003"
+    expose:
+      - "9003"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
       - postgresql
 
   microservice-clientui:
     container_name: microservice-clientui
     build: ./microservice-clientui
-    ports:
-      - "9000:9000"
+    expose:
+      - "9000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   microservice-gateway:
     container_name: microservice-gateway
     build: ./microservice-gateway
     ports:
-      - "8080:8080"
+      - "8080:8080"           # seul point d’entrée vers l’extérieur
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
     depends_on:
-      - microservice-clientui
       - microservice-patient
       - microservice-note
       - microservice-diabete
+      - microservice-clientui
+
 volumes:
   pgdata:
   mongodata:
-
-

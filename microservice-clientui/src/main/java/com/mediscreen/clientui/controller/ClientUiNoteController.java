@@ -24,42 +24,43 @@ public class ClientUiNoteController {
 	}
 
 	// LIST
-	// UI:   GET /patient/{patientId}/
-	// Proxy:GET /notes/patient/{patientId}
+	// UI:   GET /notes/patient/{patientId}/
 	@GetMapping("/notes/patient/{patientId}/")
 	public String listNotes(@PathVariable Integer patientId, Model model) {
 		List<NoteBean> notes = notesProxies.getAllNotes(patientId);
 		model.addAttribute("notes", notes);
 		model.addAttribute("patientId", patientId);
-		return "notes/notesList";
+		return "note/notesList";
 	}
 
 	// SHOW ADD FORM
-	// UI:   GET /patient/{patientId}/notes/add
+	// UI:   GET /notes/patient/{patientId}/add
 	@GetMapping("/notes/patient/{patientId}/add")
 	public String showAddNoteForm(@PathVariable Integer patientId, Model model) {
 		model.addAttribute("noteBean", new NoteBean());
 		model.addAttribute("patientId", patientId);
-		return "notes/formAddNote";
+		return "note/formAddNote";
 	}
 
 	// ADD
-	// UI:   POST /patient/{patientId}/notes/add
+	// UI:   POST /notes/patient/{patientId}/add
 	// Proxy:POST /notes/patient/{patientId}
 	@PostMapping("/notes/patient/{patientId}/add")
 	public String addNote(@PathVariable Integer patientId,
 						  @Valid @ModelAttribute("noteBean") NoteBean noteBean,
-						  BindingResult result) {
+						  BindingResult result,
+						  Model model) {
 		if (result.hasErrors()) {
-			return "notes/formAddNote";
+			model.addAttribute("patientId", patientId);
+			return "note/formAddNote";
 		}
 		noteBean.setIdPatient(patientId);
 		notesProxies.addNote(patientId, noteBean);
-		return "redirect:/notes/patient/" + patientId ;
+		return "redirect:/notes/patient/" + patientId + "/"; // <-- slash final
 	}
 
 	// SHOW UPDATE FORM
-	// UI:   GET /patient/{patientId}/notes/{noteId}/edit
+	// UI:   GET /notes/patient/{patientId}/{noteId}/edit
 	// Proxy:GET /notes/{noteId}
 	@GetMapping("/notes/patient/{patientId}/{noteId}/edit")
 	public String showUpdateNoteForm(@PathVariable Integer patientId,
@@ -67,36 +68,39 @@ public class ClientUiNoteController {
 									 Model model) {
 		Optional<NoteBean> noteOpt = notesProxies.getNote(noteId);
 		if (noteOpt.isEmpty()) {
-			return "redirect:/notes/patient/" + patientId ;
+			return "redirect:/notes/patient/" + patientId + "/"; // <-- slash final
 		}
 		model.addAttribute("noteBean", noteOpt.get());
 		model.addAttribute("patientId", patientId);
 		model.addAttribute("noteId", noteId);
-		return "notes/formUpdateNote";
+		return "note/formUpdateNote";
 	}
 
 	// UPDATE
-	// UI:   POST /patient/{patientId}/notes/{noteId}/edit
-	// Proxy:PUT  /notes/{noteId}   (ou POST /notes/update/{noteId} si backend legacy)
+	// UI:   POST /notes/patient/{patientId}/{noteId}/edit
+	// Proxy:PUT /notes/{noteId}
 	@PostMapping("/notes/patient/{patientId}/{noteId}/edit")
 	public String updateNote(@PathVariable Integer patientId,
 							 @PathVariable String noteId,
 							 @Valid @ModelAttribute("noteBean") NoteBean noteBean,
-							 BindingResult result) {
+							 BindingResult result,
+							 Model model) {
 		if (result.hasErrors()) {
-			return "notes/formUpdateNote";
+			model.addAttribute("patientId", patientId);
+			model.addAttribute("noteId", noteId);
+			return "note/formUpdateNote";
 		}
 		notesProxies.updateNote(noteId, noteBean);
-		return "redirect:/notes/patient/" + patientId ;
+		return "redirect:/notes/patient/" + patientId + "/"; // <-- slash final
 	}
 
 	// DELETE
-	// UI:   GET /patient/{patientId}/notes/{noteId}/delete
-	// Proxy:DELETE /notes/{noteId} (ou GET /notes/delete/{noteId} si legacy)
+	// UI:   GET /notes/patient/{patientId}/{noteId}/delete
+	// Proxy:DELETE /notes/{noteId}
 	@GetMapping("/notes/patient/{patientId}/{noteId}/delete")
 	public String deleteNote(@PathVariable Integer patientId,
 							 @PathVariable String noteId) {
 		notesProxies.deleteNote(noteId);
-		return "redirect:/notes/patient/" + patientId;
+		return "redirect:/notes/patient/" + patientId + "/"; // <-- slash final
 	}
 }

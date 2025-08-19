@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import com.mediscreen.clientui.beans.DiabeteBean;
+import com.mediscreen.clientui.beans.DiabetesRiskResponse;
 import com.mediscreen.clientui.beans.NoteBean;
 import com.mediscreen.clientui.beans.PatientBean;
 import com.mediscreen.clientui.proxies.DiabetesProxies;
@@ -31,33 +31,35 @@ public class ClientUiDiabeteController {
 		this.noteProxies = noteProxies;
 	}
 
+
 	@GetMapping("/patient/{id}/diabetes/getInfo")
 	public String getDiabetesInfo(@PathVariable("id") Integer patientId, Model model) {
 
-		// Récupération du patient
+		// Patient
 		Optional<PatientBean> patientOpt = patientProxies.getPatient(patientId);
 		if (patientOpt.isEmpty()) {
 			return "redirect:/";
 		}
 		PatientBean patient = patientOpt.get();
 
-		// Récupération et transformation des notes
+		// Notes -> commentaires
 		List<String> notesComments = noteProxies.getAllNotes(patientId).stream()
 				.map(NoteBean::getComment)
 				.collect(Collectors.toList());
 
-		// Construction de l'objet DiabeteBean
+		// Payload d’analyse
 		DiabeteBean diabetes = new DiabeteBean();
 		diabetes.setPatientBirthdate(patient.getBirthdate());
 		diabetes.setPatientGender(patient.getGender());
 		diabetes.getPatientNote().addAll(notesComments);
 
-		// Appel au service d'analyse
-		String result = diabetesProxies.getCase(patientId, diabetes);
+		// Appel au service d'analyse (POST /patient/{id}/diabetes/risk)
+		DiabetesRiskResponse resp = diabetesProxies.assessRisk(patientId, diabetes);
 
-		// Ajout au modèle
-		model.addAttribute("result", result);
+		// Modèle pour la vue
 		model.addAttribute("patient", patient);
+		model.addAttribute("riskLevel", resp != null ? resp.getRiskLevel() : null);
+		model.addAttribute("resultMessage", resp != null ? resp.getMessage() : "No result");
 
 		return "diabete/diabetes";
 	}
