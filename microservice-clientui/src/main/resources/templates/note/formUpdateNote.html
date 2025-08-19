@@ -1,45 +1,49 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" 
-	  xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Update Note</title>
-<link rel="stylesheet" href="/css/bootstrap.min.css" >
+	<meta charset="utf-8"/>
+	<title>Update Note</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+	<style>
+		body { background:#f6f7fb; }
+		.card { border:0; border-radius:1rem; box-shadow:0 10px 25px rgba(0,0,0,.06); }
+	</style>
 </head>
 <body>
-<div class="container">
-	<div class="row">
-		<h2>Update Note</h2>
-	</div>
-
-	<div class="row">
-		<form action="#" th:action="@{/patient/{patientId}/notes/update/{noteId}(noteId=${noteUpdate.id}, idPatient=${idPatient} )}" th:object="${noteUpdate}" method="post" class="form-horizontal" style="width: 100%">
-			 
-			
-			
-			
-			 <div class="form-group">
-				<label for="comment" class="col-sm-2 control-label">Patient Note</label>
-				<div class="col-sm-10">
-					<input type="text" th:field="*{comment}" id="comment"  placeholder="comment" class="col-4">
-
-					<p class="text-danger" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></p>
-
-				</div>
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-8">
+			<div class="d-flex align-items-center mb-4">
+				<h2 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Update Note</h2>
+				<a class="btn btn-outline-secondary btn-sm ms-auto" th:href="@{notes/patient/{id}/(id=${patientId})}">
+					<i class="bi bi-arrow-left"></i> Back
+				</a>
 			</div>
 
+			<div class="card p-4">
+				<form th:action="@{notes/patient/{pid}/{nid}/edit(pid=${patientId}, nid=${noteId})}" th:object="${noteBean}" method="post" novalidate>
+					<input type="hidden" th:field="*{id}"/>
 
-			<div class="form-group">
-				<div class="col-sm-12">
-					<input type="hidden" th:field="*{id}">
-					<a class="btn btn-danger btn-sm" href="/">Cancel</a>
-					<input class="btn btn-primary btn-sm" type="submit" value="Update Note">
-				</div>
+					<div class="mb-3">
+						<label for="comment" class="form-label">Patient Note</label>
+						<textarea id="comment" th:field="*{comment}" rows="3" class="form-control" placeholder="Type the note here..." th:errorclass="is-invalid"></textarea>
+						<div class="invalid-feedback" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
+					</div>
+
+					<div class="d-flex gap-2 justify-content-end">
+						<a class="btn btn-outline-secondary" th:href="@{notes/patient/{id}/(id=${patientId})}">
+							<i class="bi bi-x-circle"></i> Cancel
+						</a>
+						<button class="btn btn-primary" type="submit">
+							<i class="bi bi-save"></i> Update Note
+						</button>
+					</div>
+				</form>
 			</div>
-			 
-		</form>
+		</div>
 	</div>
-
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
