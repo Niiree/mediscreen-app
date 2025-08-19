@@ -10,7 +10,7 @@ import com.mediscreen.clientui.beans.PatientBean;
 
 @FeignClient(
 		name = "patient-service",
-		url = "${patients.base-url}/patient",
+		url = "${patients.base-url}",
 		configuration = com.mediscreen.clientui.config.FeignConfig.class
 )
 public interface PatientsProxies {
