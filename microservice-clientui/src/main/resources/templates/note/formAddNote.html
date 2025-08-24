@@ -1,40 +1,47 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Add New Note</title>
-<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<meta charset="utf-8"/>
+	<title>Add Note</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+	<style>
+		body { background:#f6f7fb; }
+		.card { border:0; border-radius:1rem; box-shadow:0 10px 25px rgba(0,0,0,.06); }
+	</style>
 </head>
 <body>
-	<div class="container">
+<div class="container py-5">
+	<div class="row justify-content-center">
+		<div class="col-12 col-lg-8">
+			<div class="d-flex align-items-center mb-4">
+				<h2 class="mb-0"><i class="bi bi-journal-plus me-2"></i>Add New Note</h2>
+				<a class="btn btn-outline-secondary btn-sm ms-auto" th:href="@{notes/patient/{id}/(id=${patientId})}">
+					<i class="bi bi-arrow-left"></i> Back
+				</a>
+			</div>
 
-		<div class="row">
-			<h2>Add New Note</h2>
-		</div>
-
-		<div class="row">
-			<form action="#" th:action="@{/patient/{id}/notes/add(id=${idPatient})}"
-				th:object="${noteBean}" method="post" class="form-horizontal"
-				style="width: 100%">
-			
-				<div>
-					<input class="form-control mb-4" th:field="*{comment}"
-						placeholder="comment" autofocus="autofocus">
-					<p class="text-danger" th:if="${#fields.hasErrors('comment')}"
-						th:errors="*{comment}"></p>
-				</div>
-				
-				<div class="form-group">
-					<div class="col-sm-12">
-						<input class="btn btn-primary btn-sm" type="submit"
-							value="Save Patient"> 
-						<a class="btn btn-danger btn-sm" href="/">Back to Index</a>
+			<div class="card p-4">
+				<form th:action="@{notes/patient/{id}/add(id=${patientId})}" th:object="${noteBean}" method="post" novalidate>
+					<div class="mb-3">
+						<label for="comment" class="form-label">Patient Note</label>
+						<textarea id="comment" th:field="*{comment}" rows="3" class="form-control" placeholder="Type the note here..." autofocus th:errorclass="is-invalid"></textarea>
+						<div class="invalid-feedback" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
 					</div>
-				</div>			
-			</form>
-		</div>
 
+					<div class="d-flex gap-2 justify-content-end">
+						<a class="btn btn-outline-secondary" th:href="@{notes/patient/{id}/(id=${patientId})}">
+							<i class="bi bi-x-circle"></i> Cancel
+						</a>
+						<button class="btn btn-primary" type="submit">
+							<i class="bi bi-save"></i> Save Note
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
 	</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        # Redirige la racine / vers /ui/
+        - id: root-to-ui
+          uri: no://op
+          predicates:
+            - Path=/
+          filters:
+            - RedirectTo=302, /ui/
+
+        # UI
+        - id: client-ui
+          uri: http://microservice-clientui:9000
+          predicates:
+            - Path=/ui/**
+          filters:
+            - StripPrefix=1
+            - PreserveHostHeader
+            - AddRequestHeader=X-Forwarded-Prefix, /ui
+        # API
+        - id: patients
+          uri: http://microservice-patient:9001
+          predicates: [ Path=/patient/** ]
+          filters: [ StripPrefix=0 ]
+
+        - id: notes
+          uri: http://microservice-note:9002
+          predicates: [ Path=/notes/** ]
+          filters: [ StripPrefix=0 ]
+
+        - id: diabetes
+          uri: http://microservice-diabete:9003
+          predicates: [ Path=/diabetes/** ]
+          filters: [ StripPrefix=0 ]

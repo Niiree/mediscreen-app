@@ -1,79 +1,67 @@
 package com.mediscreen.patient.controller;
 
 import java.util.List;
-import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.validation.annotation.Validated;
 
-import com.mediscreen.patient.exception.PatientNotFoundException;
+import org.springframework.web.bind.annotation.*;
+
 import com.mediscreen.patient.model.Patient;
 import com.mediscreen.patient.service.PatientService;
 
 @RestController
+@RequestMapping("/patient")
+@Validated
 public class PatientController {
-	
-	private Logger logger = LoggerFactory.getLogger(PatientController.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(PatientController.class);
+
+	private final PatientService patientService;
 
 	@Autowired
-	private PatientService patientService;
-	
-	@GetMapping("/patient/getAll") 
-	public ResponseEntity<List<Patient>> getAllPatient(){
-		
-		return ResponseEntity.ok(patientService.getAll());	
-	}
-	
-	@GetMapping("/patient/read/{id}")
-	public ResponseEntity<Object> getPatient(@PathVariable("id") Integer id){
-		try{
-			Patient patient = patientService.getPatient(id);
-			return ResponseEntity.ok(patient);
-		}catch (Exception e) {
-			e.printStackTrace();
-			logger.warn("Not found");
-			return patientNotFound();
-		}	
-	}
-	
-	@PostMapping("/patient/add")
-	public ResponseEntity<Object> addPatient(@RequestBody Patient patient){
-		return ResponseEntity.status(HttpStatus.CREATED).body(patientService.create(patient));
-	}
-	
-	@PostMapping("/patient/update/{id}")
-	public ResponseEntity<Object>  updatePatient(@PathVariable("id") Integer id, @RequestBody Patient patient){
-		try {
-			logger.info("try update patient");
-			return ResponseEntity.ok(patientService.update(id, patient));
-		}catch(PatientNotFoundException e) {
-			e.printStackTrace();
-			logger.warn("Not found");
-			return patientNotFound();
-		}
-		
-	}
-	
-	@GetMapping("/patient/delete/{id}")
-	public ResponseEntity<Object> deletePatient(@PathVariable("id") Integer id)	{
-		if(patientService.delete(id)) {
-			return ResponseEntity.ok("Deletion successful !");
-		}else {
-			return patientNotFound();
-		}	
-	}
-	
-	private ResponseEntity<Object> patientNotFound(){
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Patient was not found.");
+	public PatientController(PatientService patientService) {
+		this.patientService = patientService;
 	}
 
+	@GetMapping("/getAll")
+	public ResponseEntity<List<Patient>> getAllPatients() {
+		logger.info("GET /patient/getAll - Fetching all patients");
+		return ResponseEntity.ok(patientService.getAll());
+	}
+
+	@GetMapping("/{id}")
+	public ResponseEntity<Patient> getPatient(@PathVariable Integer id) {
+		logger.info("GET /patient/{} - Fetching patient", id);
+		Patient patient = patientService.getPatient(id); // lance PatientNotFoundException si introuvable
+		return ResponseEntity.ok(patient);
+	}
+
+	@PostMapping
+	public ResponseEntity<Patient> addPatient(@Valid @RequestBody Patient patient) {
+		logger.info("POST /patient - Creating new patient");
+		Patient created = patientService.create(patient);
+		return ResponseEntity.status(HttpStatus.CREATED).body(created);
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<Patient> updatePatient(@PathVariable Integer id, @Valid @RequestBody Patient patient) {
+		logger.info("PUT /patient/{} - Updating patient", id);
+		Patient updated = patientService.update(id, patient); // lance PatientNotFoundException si introuvable
+		return ResponseEntity.ok(updated);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deletePatient(@PathVariable Integer id) {
+		logger.info("DELETE /patient/{} - Deleting patient", id);
+		patientService.delete(id); // lance PatientNotFoundException si introuvable
+		return ResponseEntity.noContent().build(); // 204
+	}
 }

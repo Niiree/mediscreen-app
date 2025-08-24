@@ -1,15 +1,15 @@
 package com.mediscreen.clientui.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import com.mediscreen.clientui.beans.DiabeteBean;
+import com.mediscreen.clientui.beans.DiabetesRiskResponse;
 import com.mediscreen.clientui.beans.NoteBean;
 import com.mediscreen.clientui.beans.PatientBean;
 import com.mediscreen.clientui.proxies.DiabetesProxies;
@@ -18,43 +18,49 @@ import com.mediscreen.clientui.proxies.PatientsProxies;
 
 @Controller
 public class ClientUiDiabeteController {
-	@Autowired
-	DiabetesProxies diabetesProxies;
-	
-	@Autowired
-	PatientsProxies patientProxies;
-	
-	@Autowired
-	NotesProxies noteProxies;
-	
-	
+
+	private final DiabetesProxies diabetesProxies;
+	private final PatientsProxies patientProxies;
+	private final NotesProxies noteProxies;
+
+	public ClientUiDiabeteController(DiabetesProxies diabetesProxies,
+									 PatientsProxies patientProxies,
+									 NotesProxies noteProxies) {
+		this.diabetesProxies = diabetesProxies;
+		this.patientProxies = patientProxies;
+		this.noteProxies = noteProxies;
+	}
+
+
 	@GetMapping("/patient/{id}/diabetes/getInfo")
-	public String getCase(@PathVariable("id") Integer patientId, Model model)
-	{
-		DiabeteBean diabetes = new DiabeteBean();
-		
-		PatientBean patient = patientProxies.getPatient(patientId).get();
-		
-		List<NoteBean> noteList = noteProxies.getAllNotes(patientId);
-		
-		List<String> newList = new ArrayList<>();
-		
-		for (NoteBean noteBean : noteList)
-		{
-			newList.add(noteBean.getComment());
+	public String getDiabetesInfo(@PathVariable("id") Integer patientId, Model model) {
+
+		// Patient
+		Optional<PatientBean> patientOpt = patientProxies.getPatient(patientId);
+		if (patientOpt.isEmpty()) {
+			return "redirect:/";
 		}
-	
-		
+		PatientBean patient = patientOpt.get();
+
+		// Notes -> commentaires
+		List<String> notesComments = noteProxies.getAllNotes(patientId).stream()
+				.map(NoteBean::getComment)
+				.collect(Collectors.toList());
+
+		// Payload d’analyse
+		DiabeteBean diabetes = new DiabeteBean();
 		diabetes.setPatientBirthdate(patient.getBirthdate());
 		diabetes.setPatientGender(patient.getGender());
-		diabetes.getPatientNote().addAll(newList);
-		System.out.println(patient.getBirthdate());
-		
-		String result = diabetesProxies.getCase(patientId, diabetes);
-		
-		model.addAttribute("result", result);
-		
+		diabetes.getPatientNote().addAll(notesComments);
+
+		// Appel au service d'analyse (POST /patient/{id}/diabetes/risk)
+		DiabetesRiskResponse resp = diabetesProxies.assessRisk(patientId, diabetes);
+
+		// Modèle pour la vue
+		model.addAttribute("patient", patient);
+		model.addAttribute("riskLevel", resp != null ? resp.getRiskLevel() : null);
+		model.addAttribute("resultMessage", resp != null ? resp.getMessage() : "No result");
+
 		return "diabete/diabetes";
 	}
-	
 }

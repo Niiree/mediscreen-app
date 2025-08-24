@@ -1,3 +1,25 @@
-FROM openjdk:17
-CMD 
-ENTRYPOINT ["java", "-jar", "mediscreen-patient-1.0.0.jar"]
+FROM gradle:8.5-jdk17 AS build
+WORKDIR /app
+
+# Copier les fichiers nécessaires au build
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
+COPY src ./src
+
+# Rendre le wrapper gradle exécutable
+RUN chmod +x gradlew
+
+# Construire le projet sans exécuter les tests
+RUN ./gradlew build -x test
+
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+
+# Copier le jar depuis l'étape de build
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Exposer le port 9001
+EXPOSE 9001
+
+# Commande pour démarrer l'application
+ENTRYPOINT ["java", "-jar", "app.jar"]

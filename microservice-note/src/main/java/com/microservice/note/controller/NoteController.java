@@ -1,72 +1,92 @@
 package com.microservice.note.controller;
 
 import java.util.List;
-import java.util.Optional;
 
+import javax.validation.Valid;
+
+import com.microservice.note.exception.NoteNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+
+import org.springframework.web.bind.annotation.*;
 
 import com.microservice.note.model.Note;
 import com.microservice.note.service.NoteService;
 
 @RestController
+@RequestMapping
+@Validated
 public class NoteController {
-	
-	private Logger logger = LoggerFactory.getLogger(NoteController.class);
-	
+
+	private static final Logger logger = LoggerFactory.getLogger(NoteController.class);
+
+	private final NoteService noteService;
+
 	@Autowired
-	private NoteService noteService;
-	
-	@GetMapping("/patient/{id}/notes")
-	public ResponseEntity<List<Note>> getAllNote(@PathVariable ("id") Integer idPatient){
-		
-		return ResponseEntity.ok(noteService.getAllNotes(idPatient));
+	public NoteController(NoteService noteService) {
+		this.noteService = noteService;
 	}
 
-	@PostMapping("patient/{id}/notes/add")
-	public ResponseEntity<Object> addNote(@PathVariable("id") Integer idPatient, @RequestBody Note note){
-		return ResponseEntity.status(HttpStatus.CREATED).body(noteService.create(idPatient, note));
+	/**
+	 * Récupère toutes les notes d'un patient.
+	 * GET /patient/{patientId}/notes
+	 */
+	@GetMapping("notes/patient/{patientId}")
+	public ResponseEntity<List<Note>> getAllNotesForPatient(@PathVariable Integer patientId) {
+		logger.info("GET /patient/{}/notes - Fetching all notes for patient", patientId);
+		return ResponseEntity.ok(noteService.getAllNotes(patientId));
 	}
-	
-	@GetMapping("update/{id}")
-	public ResponseEntity<Object> getNote (@PathVariable("id") String id ){
-		try {
-			return ResponseEntity.ok(noteService.get(id));
-		}catch(Exception e) {
-			e.printStackTrace();
-			logger.warn("Not found");
-			return noteNotFound();		}
+
+	/**
+	 * Crée une note pour un patient.
+	 * POST /patient/{patientId}/notes
+	 */
+	@PostMapping("/notes/patient/{patientId}")
+	public ResponseEntity<Note> addNote(@PathVariable Integer patientId, @Valid @RequestBody Note note) {
+		logger.info("POST /patient/{}/notes - Creating note", patientId);
+		Note created = noteService.create(patientId, note);
+		return ResponseEntity.status(HttpStatus.CREATED).body(created);
 	}
-	
-	@PostMapping("update/{id}")
-	public ResponseEntity<Object> updateNote(@PathVariable("id")String id, @RequestBody Note note){
-		try {
-			return ResponseEntity.ok(noteService.update(id, note));
-		}catch(Exception e) {
-			e.printStackTrace();
-			logger.warn("Not found");
-			return noteNotFound();		}
-		
+
+	/**
+	 * Récupère une note par son ID.
+	 * GET /notes/{noteId}
+	 */
+	@GetMapping("/notes/{noteId}")
+	public ResponseEntity<Note> getNote(@PathVariable String noteId) {
+		logger.info("GET /notes/{} - Fetching note", noteId);
+		Note note = noteService.get(noteId);
+		return ResponseEntity.ok(note);
 	}
-	
-	@GetMapping("delete/{id}")
-	public ResponseEntity<Object> deleteNote(@PathVariable("id")String id){
-		if(noteService.delete(id)) {
-			return ResponseEntity.ok("Deletion successful !");
-		}else{
-			return noteNotFound();
+
+	/**
+	 * Met à jour une note.
+	 * PUT /notes/{noteId}
+	 */
+	@PutMapping("/notes/{noteId}")
+	public ResponseEntity<Note> updateNote(@PathVariable String noteId, @Valid @RequestBody Note note) {
+		logger.info("PUT /notes/{} - Updating note", noteId);
+		Note updated = noteService.update(noteId, note);
+		return ResponseEntity.ok(updated);
+	}
+
+	/**
+	 * Supprime une note.
+	 * DELETE /notes/{noteId}
+	 */
+	@DeleteMapping("/notes/{noteId}")
+	public ResponseEntity<Void> deleteNote(@PathVariable String noteId) {
+		logger.info("DELETE /notes/{} - Deleting note", noteId);
+		boolean deleted = noteService.delete(noteId);
+		if (!deleted) {
+			logger.warn("Note not found: {}", noteId);
+			return ResponseEntity.notFound().build();
 		}
-	}
-	
-	private ResponseEntity<Object> noteNotFound(){
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Note was not found.");
+		return ResponseEntity.noContent().build();
 	}
 }

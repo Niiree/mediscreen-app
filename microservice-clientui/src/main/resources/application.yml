@@ -1,0 +1,19 @@
+server:
+  port: 9000
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: client-ui
+
+
+gateway:
+  base-url: http://microservice-gateway:8080
+
+patients:
+  base-url: http://microservice-gateway:8080/patient
+notes:
+  base-url: http://microservice-gateway:8080/notes
+diabetes:
+  base-url: http://microservice-gateway:8080/diabetes
+

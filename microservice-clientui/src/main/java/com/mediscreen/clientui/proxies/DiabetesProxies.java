@@ -1,16 +1,19 @@
 package com.mediscreen.clientui.proxies;
 
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import com.mediscreen.clientui.beans.DiabeteBean;
+import com.mediscreen.clientui.beans.DiabetesRiskResponse;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name="mediscreen-diabetes", url="localhost:9003")
+@FeignClient(
+		name = "diabetes-service",
+		url = "${diabetes.base-url}", // == http://microservice-gateway:8080 (profil docker)
+		configuration = com.mediscreen.clientui.config.FeignConfig.class
+)
 public interface DiabetesProxies {
-	
-	@PostMapping("/patient/{id}/diabetes/getInfo")
-	public String getCase(@PathVariable("id") Integer id, @RequestBody DiabeteBean DiabetesBean);
 
+	// Correspond EXACTEMENT au backend: POST /patient/{patientId}/diabetes/risk
+	@PostMapping("/patient/{id}/risk")
+	DiabetesRiskResponse assessRisk(@PathVariable("id") Integer id,
+									@RequestBody DiabeteBean diabetesBean);
 }
